@@ -1,5 +1,15 @@
 import sys
 
+def handle_echo(args):
+    """Handle the echo builtin command."""
+    if args:
+        # Join arguments with spaces and print
+        output = " ".join(args)
+        print(output)
+    else:
+        # Echo with no arguments prints empty line
+        print()
+
 
 def main():
     while True:
@@ -13,6 +23,7 @@ def main():
             continue
 
         command = parts[0]
+        args = parts[1:]
 
         if command == "exit":
             if len(parts) > 1:
@@ -20,6 +31,8 @@ def main():
                 sys.exit(exit_code)
             else:
                 sys.exit(0)
+        elif command == "echo":
+            handle_echo(args)
         else:
             print(f"{command_line}: command not found")
 
