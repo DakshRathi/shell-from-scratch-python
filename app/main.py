@@ -1,5 +1,15 @@
 import sys
 
+
+def handle_exit(args):
+    """Handle the exit builtin command."""
+    if len(args) > 0:
+        exit_code = int(args[0])
+        sys.exit(exit_code)
+    else:
+        sys.exit(0)
+
+
 def handle_echo(args):
     """Handle the echo builtin command."""
     if args:
@@ -11,7 +21,22 @@ def handle_echo(args):
         print()
 
 
+def handle_type(args, builtin_commands):
+    """Handle the type builtin command."""
+    if not args:
+        print("type: missing argument", file=sys.stderr)
+        return
+    
+    for command_name in args:
+        if command_name in builtin_commands:
+            print(f"{command_name} is a shell builtin")
+        else:
+            print(f"{command_name}: not found")
+
+
 def main():
+    builtin_commands = {"echo", "exit", "type"}
+
     while True:
         sys.stdout.write("$ ")
         sys.stdout.flush()
@@ -26,13 +51,11 @@ def main():
         args = parts[1:]
 
         if command == "exit":
-            if len(parts) > 1:
-                exit_code = int(parts[1])
-                sys.exit(exit_code)
-            else:
-                sys.exit(0)
+            handle_exit(args)
         elif command == "echo":
             handle_echo(args)
+        elif command == "type":
+            handle_type(args, builtin_commands)
         else:
             print(f"{command_line}: command not found")
 
