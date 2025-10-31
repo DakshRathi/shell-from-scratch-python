@@ -1,63 +1,56 @@
 import sys
+import shutil
 
 
-def handle_exit(args):
-    """Handle the exit builtin command."""
-    if len(args) > 0:
-        exit_code = int(args[0])
-        sys.exit(exit_code)
+def exit_cmd(args):
+    if len(args) > 1:
+        sys.exit(int(args[1]))
+    sys.exit(0)
+
+
+def echo_cmd(args):
+    if len(args) > 1:
+        print(" ".join(args[1:]))
     else:
-        sys.exit(0)
-
-
-def handle_echo(args):
-    """Handle the echo builtin command."""
-    if args:
-        # Join arguments with spaces and print
-        output = " ".join(args)
-        print(output)
-    else:
-        # Echo with no arguments prints empty line
         print()
 
 
-def handle_type(args, builtin_commands):
-    """Handle the type builtin command."""
-    if not args:
+def type_cmd(args):
+    if len(args) < 2:
         print("type: missing argument", file=sys.stderr)
         return
     
-    for command_name in args:
-        if command_name in builtin_commands:
+    for command_name in args[1:]:
+        if command_name in BUILT_INS:
             print(f"{command_name} is a shell builtin")
+        elif full_path := shutil.which(command_name):
+            print(f"{command_name} is {full_path}")
         else:
             print(f"{command_name}: not found")
 
 
-def main():
-    builtin_commands = {"echo", "exit", "type"}
+BUILT_INS = {
+    'exit': exit_cmd,
+    'echo': echo_cmd,
+    'type': type_cmd
+}
 
+
+def main():
     while True:
         sys.stdout.write("$ ")
-        sys.stdout.flush()
-
-        command_line = input()
-        parts = command_line.split()
-
-        if not parts:
+        command = input().strip()
+        
+        if not command:
             continue
 
-        command = parts[0]
-        args = parts[1:]
+        parts = command.split()
+        cmd = parts[0]
 
-        if command == "exit":
-            handle_exit(args)
-        elif command == "echo":
-            handle_echo(args)
-        elif command == "type":
-            handle_type(args, builtin_commands)
+        if cmd in BUILT_INS:
+            BUILT_INS[cmd](parts)
         else:
-            print(f"{command_line}: command not found")
+            print(f"{cmd}: command not found")
 
 
 if __name__ == "__main__":
