@@ -1,5 +1,6 @@
 import sys
 import shutil
+import subprocess
 
 
 def exit_cmd(args):
@@ -36,21 +37,37 @@ BUILT_INS = {
 }
 
 
+def run_external_program(program_name, args):
+    """
+    Execute an external program with the given arguments.
+    """
+    executable_path = shutil.which(program_name)
+    
+    if not executable_path:
+        print(f"{program_name}: command not found")
+        return
+    
+    try:
+        subprocess.run(args, executable=executable_path, check=False)
+    except (OSError, subprocess.SubprocessError) as e:
+        print(f"{program_name}: {e}", file=sys.stderr)
+
+
 def main():
     while True:
         sys.stdout.write("$ ")
         command = input().strip()
-        
+
         if not command:
             continue
 
-        parts = command.split()
-        cmd = parts[0]
+        args = command.split()
+        cmd = args[0]
 
         if cmd in BUILT_INS:
-            BUILT_INS[cmd](parts)
+            BUILT_INS[cmd](args)
         else:
-            print(f"{cmd}: command not found")
+            run_external_program(cmd, args)
 
 
 if __name__ == "__main__":
